@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchAssetById, updateAsset } from '../../reducers/assetSlice'
 import { Button, TextField, Typography, Box } from '@mui/material';
+import "./AssetList.css";
 
 const AssetDetail = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const asset = useSelector(state => state.assets.items.find(asset => asset.id === parseInt(id)));
+    const asset = useSelector(state => state.assets.selectedAsset );
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         description: '',
@@ -39,9 +40,14 @@ const AssetDetail = () => {
 
     const handleSave = () => {
         dispatch(updateAsset({ id, ...formData }));
+        console.log("modificado:",updateAsset({ id, ...formData }) )
         setIsEditing(false);
+        //handleBack();
     };
 
+    const handleBack = () => {
+        navigate('/');
+    }
     const handleCancel = () => {
         setIsEditing(false);
         setFormData({
@@ -57,7 +63,8 @@ const AssetDetail = () => {
     }
 
     return (
-        <Box>
+        <div className='center-container'>
+            <div className='table-container'>
             <Typography variant="h4">Detalle de Asset</Typography>
             <TextField
                 label="Descripción"
@@ -106,16 +113,19 @@ const AssetDetail = () => {
                             Cancelar
                         </Button>
                     </>
-                ) : (
+                ) : ( <>
                     <Button variant="contained" color="primary" onClick={() => setIsEditing(true)}>
                         Editar
                     </Button>
+                    <Button variant="outlined" color="secondary" onClick={handleBack}>
+                        Volver
+                    </Button>
+                    </>
                 )}
-                <Button variant="outlined" color="secondary" onClick={() => navigate('/')} sx={{ ml: 2 }}>
-                    Volver
-                </Button>
+                
             </Box>
-        </Box>
+            </div>
+        </div>
     );
 };
 

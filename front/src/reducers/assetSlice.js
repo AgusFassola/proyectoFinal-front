@@ -3,28 +3,28 @@ import axios from 'axios';
 
 // Thunks para interactuar con la API
 export const fetchAssets = createAsyncThunk('assets/fetchAssets', async () => {
-    const response = await axios.get('/api/assets');
+    const response = await axios.get('http://localhost:5000/api/assets');
     return response.data.assets;
 });
 
 
 export const fetchAssetById = createAsyncThunk('assets/fetchAssetById', async (id) => {
-    const response = await axios.get(`/api/assets/${id}`);
+    const response = await axios.get(`http://localhost:5000/api/assets/${id}`);
     return response.data.asset;
   });
 
 export const addAsset = createAsyncThunk('assets/addAsset', async (asset) => {
-    const response = await axios.post('/api/assets', asset);
+    const response = await axios.post('http://localhost:5000/api/assets', asset);
     return response.data.asset;
 });
 
 export const updateAsset = createAsyncThunk('assets/updateAsset', async ({ id, updatedData }) => {
-    const response = await axios.patch(`/api/assets/${id}`, updatedData);
+    const response = await axios.patch(`http://localhost:5000/api/assets/${id}`, updatedData);
     return response.data.asset;
 });
 
 export const deleteAsset = createAsyncThunk('assets/deleteAsset', async (id) => {
-    await axios.delete(`/api/assets/${id}`);
+    await axios.delete(`http://localhost:5000/api/assets/${id}`);
     return id;
 });
 

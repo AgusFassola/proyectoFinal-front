@@ -3,6 +3,9 @@ import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
+    const handleLogout = () => {
+        console.log("logout");
+      };
   return (
     <AppBar position='static'>
         <Toolbar>
@@ -17,6 +20,9 @@ const Navbar = () => {
             </Button>
             <Button color='inherit' component={Link} to='/users'>
                 Usuarios
+            </Button>
+            <Button color="secondary" onClick={handleLogout}>
+                        Logout
             </Button>
         </Toolbar>
     </AppBar>
