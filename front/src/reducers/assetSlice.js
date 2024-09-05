@@ -14,7 +14,7 @@ export const fetchAssetById = createAsyncThunk('assets/fetchAssetById', async (i
   });
 
 export const addAsset = createAsyncThunk('assets/addAsset', async (asset) => {
-    const response = await axios.post('http://localhost:5000/api/assets', asset);
+    const response = await axios.post('http://localhost:5000/api/assets/create', asset);
     return response.data.asset;
 });
 

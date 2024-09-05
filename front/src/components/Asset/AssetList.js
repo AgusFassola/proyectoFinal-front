@@ -11,22 +11,38 @@ import {
   Paper,
   Button,
   Typography,
-  Dialog, DialogActions, DialogContent, DialogTitle,DialogContentText,
-
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
+  TextField,
+  TableSortLabel,
+  Pagination,
+  Grid,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import './AssetList.css';
+import "./AssetList.css";
 
 const AssetList = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState(null);
   const dispatch = useDispatch();
-  const { assets, loading, error } = useSelector((state) => state.assets);
+  const { assets, loading, error, totalPages, currentPage } = useSelector(
+    (state) => state.assets
+  );
   const navigate = useNavigate();
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
+  const [page, setPage] = useState(1);
+
   useEffect(() => {
-    dispatch(fetchAssets());
-  }, [dispatch]);
+    dispatch(
+      fetchAssets({ description: searchTerm, sortField, sortDirection, page })
+    );
+  }, [dispatch, searchTerm, sortField, sortDirection, page]);
 
   const handleOpenDialog = (asset) => {
     setAssetToDelete(asset);
@@ -41,6 +57,30 @@ const AssetList = () => {
     handleCloseDialog();
   };
 
+  const handleSort = (field) => {
+    const isAsc = sortField === field && sortDirection === "asc";
+    setSortDirection(isAsc ? "desc" : "asc");
+    setSortField(field);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  /* const filteredAssets = sortedAssets.filter(asset => {
+    return (
+        asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+}); */
+
+  const token = localStorage.getItem("token");
+  const role = token ? JSON.parse(atob(token.split(".")[1])).role : null;
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -48,21 +88,67 @@ const AssetList = () => {
     return <div>Error: {error}</div>;
   }
   return (
-    <div className='center-container'>
-      
-      <div className="table-container">  
+    <div className="center-container">
+      <div className="search-btn">
+        <div item>
+          <TextField
+            label="Buscar"
+            variant="outlined"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+        <div item>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/assets/new")}
+          >
+            Agregar Asset
+          </Button>
+        </div>
+      </div>
+      <div className="table-container">
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="Asset List">
             <TableHead>
               <TableRow>
-                <TableCell className="table-head" >Description</TableCell>
-                <TableCell className="table-head">Category</TableCell>
-                <TableCell className="table-head">Assigned Employee</TableCell>
-                <TableCell className="table-head">Actions</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === "description"}
+                    direction={
+                      sortField === "description" ? sortDirection : "asc"
+                    }
+                    onClick={() => handleSort("description")}
+                  >
+                    Description
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === "category"}
+                    direction={sortField === "category" ? sortDirection : "asc"}
+                    onClick={() => handleSort("category")}
+                  >
+                    Category
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === "assigned_employee"}
+                    direction={
+                      sortField === "assigned_employee" ? sortDirection : "asc"
+                    }
+                    onClick={() => handleSort("assigned_employee")}
+                  >
+                    Assigned Employee
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {assets.map( asset => (
+              {assets.map((asset) => (
                 <TableRow
                   key={asset.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -81,20 +167,23 @@ const AssetList = () => {
                       onClick={(e) => {
                         e.stopPropagation(); // Evita que el clic en el botón también navegue
                         navigate(`/assets/${asset.id}`);
-                      }}sx={{ mr: 1 }}
+                      }}
+                      sx={{ mr: 1 }}
                     >
                       Details
                     </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Evita que el clic en el botón también navegue
-                        handleOpenDialog(asset);
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    {role === "admin" && (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Evita que el clic en el botón también navegue
+                          handleOpenDialog(asset);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -109,27 +198,37 @@ const AssetList = () => {
           </Table>
         </TableContainer>
       </div>
+      <Pagination
+        count={totalPages}
+        page={currentPage}
+        onChange={handlePageChange}
+        color="primary"
+        sx={{ mt: 2 }}
+      />
       <Dialog
-                open={openDialog}
-                onClose={handleCloseDialog}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">{"Confirmar Eliminación"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        ¿Estás seguro que deseas eliminar el asset "{assetToDelete?.description}"?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="primary">
-                        Cancelar
-                    </Button>
-                    <Button onClick={handleDelete} color="error" autoFocus>
-                        Eliminar
-                    </Button>
-                </DialogActions>
-            </Dialog>
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirmar Eliminación"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            ¿Estás seguro que deseas eliminar el asset "
+            {assetToDelete?.description}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleDelete} color="error" autoFocus>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
