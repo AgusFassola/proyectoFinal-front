@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addUser } from '../../reducers/usersSlice';
+import { TextField, Button, Container, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio  } from '@mui/material';
+import "../../material/theme";
 
 const UserCreate = () => {
     const [formData, setFormData] = useState({
@@ -23,10 +25,9 @@ const UserCreate = () => {
         e.preventDefault();
 
        try{
-        console.log("nuevo usuario:",formData)
         await dispatch(addUser({ ...formData}));
         alert("Usuario agregado correctamente");
-        navigate('/login');
+        navigate('/users');
         console.log("nuevo empleado:",formData)
        }catch(error){
         alert("error agregando el usuario: "+ error.message);
@@ -34,60 +35,71 @@ const UserCreate = () => {
     };
 
     return (
-        <form className='primer-div' onSubmit={handleSubmit}>
-            <h2>Nuevo usuario</h2>
-            <div className='form-group'>
-                <label>Nombre de Usuario:</label>
-                <input
-                    type="text"
-                    className="form-control"
+        <Container maxWidth="sm" className="create-user-container">
+            <Typography variant="h4" align="center" gutterBottom>
+                Nuevo usuario
+            </Typography>
+            <form onSubmit={handleSubmit}>
+                <TextField 
+                    label="Nombre de usuario"
+                    variant='outlined'
+                    fullWidth
+                    margin='normal'
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    placeholder="Usuario" required
+                    required
                 />
-            </div>
-
-            <div>
-                <label>Email:</label>
-                <input
-                    type="text"
-                    className="form-control"
+                <TextField
+                    label="Email"
+                    variant='outlined'
+                    fullWidth
+                    margin='normal'
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="Email" required
+                    required
                 />
-            </div>
-
-            <div>
-                <label>Contraseña:</label>
-                <input
-                    type="password"
-                    className="form-control"
+                <TextField
+                    label="Contraseña"
+                    variant='outlined'
+                    fullWidth
+                    margin='normal'
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Contraseña" required
+                    required
                 />
-            </div>
-            <div>
-                <label>Rol:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    placeholder="Rol" 
-                />
-            </div>
-            <button className='btn btn-primary' type="submit">Agregar</button>
-            
-            <Link 
-                to="/users" className="btn btn-danger mb-3"
-            >Cancelar</Link> 
-        </form>
+                <FormControl component="fieldset" margin="normal" fullWidth>
+                    <FormLabel component="legend">Rol</FormLabel>
+                    <RadioGroup
+                        style={{ display: 'flex', flexDirection: 'row' }}
+                        aria-label="role"
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        required
+                    >
+                        <FormControlLabel value="user" control={<Radio />} label="User" />
+                        <FormControlLabel value="admin" control={<Radio />} label="Admin" />
+                    </RadioGroup>
+                </FormControl>
+                <Button 
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    className="create-button"
+                >Agregar</Button>
+                <Link to="/users" className="cancel-button">
+                    <Button
+                        variant="outlined"
+                        color="secondary"
+                        fullWidth
+                    >Cancelar</Button>
+                </Link> 
+            </form>
+        </Container>
     );
 };
 

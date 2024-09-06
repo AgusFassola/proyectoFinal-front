@@ -109,6 +109,8 @@ const UserList = () => {
                         <th>Acción</th>
                     </tr>
                 </thead>
+                <Link to="/users/new" className='signup-link'
+            >Crear nuevo usuario</Link>
                 <tbody>
                     {/* se crea una copia de una porcion del array
                     devuelve los empleados del 0 al 4 */}

@@ -46,7 +46,7 @@ const AssetDetail = () => {
     };
 
     const handleBack = () => {
-        navigate('/');
+        navigate('/assets');
     }
     const handleCancel = () => {
         setIsEditing(false);

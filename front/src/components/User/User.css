@@ -1,0 +1,17 @@
+.create-user-container {
+    margin-top: 50px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.create-button {
+    margin-top: 20px;
+}
+
+.cancel-button {
+    margin-top: 10px;
+    text-align: center;
+}
+

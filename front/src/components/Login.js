@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { TextField, Button, Container, Typography, Alert } from '@mui/material';
+import "../material/theme";
 
 const Login = () =>{
     const [ username, setUsername ] = useState('');
@@ -28,46 +30,41 @@ const Login = () =>{
 
     
     return (
-        <div className='container'>
-            <h2>Iniciar Sesión</h2>
-            { error && <div className='alert alert-danger'>{error}</div> }
+        <Container maxWidth="xs" className="login-container">
+            <Typography variant="h4" align="center" gutterBottom>
+                Iniciar Sesión
+            </Typography>
+
+            { error && <Alert severity="error">{error}</Alert> }
             <form onSubmit={handleLogin}>
-                <div className='mb-3'>
-                    <label 
-                        htmlFor='username' 
-                        className='form-label'
-                    >Correo electrónico</label>
-                    <input 
-                        type='text'
-                        className='form-control'
-                        id='username'
+                <TextField
+                        label="Correo electrónico"
+                        variant="outlined" 
+                        fullWidth
+                        margin="normal"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                    />
-                </div>
-                <div className='mb-3'>
-                    <label
-                        htmlFor='password'
-                        className='form-label'
-                    >Contraseña</label>
-                    <input
+                />
+                <TextField 
+                        label="Contraseña"
                         type='password'
-                        className='form-control'
-                        id='password'
+                        variant="outlined"
+                        fullWidth
+                        margin='normal'
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                    />
-                </div>
-                <button
+                />
+                <Button
                     type='submit'
-                    className='btn btn-primary'
-                >Iniciar sesión</button>
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    className='login-button'
+                >Iniciar sesión</Button>
             </form>
-            <Link to="/users/new"
-            >Crear nuevo usuario</Link>
-        </div>
+        </Container>
     )
 };
 

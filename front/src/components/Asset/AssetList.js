@@ -1,28 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAssets, deleteAsset } from "../../reducers/assetSlice";
-import {
-  Table,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Typography,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  DialogContentText,
-  TextField,
-  TableSortLabel,
-  Pagination,
-  Grid,
-} from "@mui/material";
+import {Table,TableContainer,TableBody,TableCell,TableHead,
+  TableRow,Paper,Button,Typography,Dialog,DialogActions,
+  DialogContent,DialogTitle,DialogContentText,TextField,
+  TableSortLabel,Pagination, Box} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import "./AssetList.css";
+import "../../material/theme";
 
 const AssetList = () => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -37,6 +21,7 @@ const AssetList = () => {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [page, setPage] = useState(1);
+  //const pagesVisited = page * totalPages;
 
   useEffect(() => {
     dispatch(
@@ -70,44 +55,63 @@ const AssetList = () => {
   const handlePageChange = (event, value) => {
     setPage(value);
   };
+  const sortedAssets = [...assets].sort((a, b) => {
+    if (sortField) {
+      const valueA = a[sortField].toLowerCase();
+      const valueB = b[sortField].toLowerCase();
+      if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+      if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    }
+    return 0;
+  });
+  
 
-  /* const filteredAssets = sortedAssets.filter(asset => {
+  const filteredAssets = sortedAssets.filter(asset => {
     return (
-        asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.category.toLowerCase().includes(searchTerm.toLowerCase())
+        asset.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.assigned_employee.toLowerCase().includes(searchTerm.toLowerCase())
+
     );
-}); */
+});
+
+/* const assetsPerPage = 5;
+const pagesVisited = page * assetsPerPage; */
+
+//const pageCount =  Math.ceil(filteredAssets.length / totalPages);//total de páginas necesarias redondeando para arriba
+/* const changePage = ({ selected }) => {
+    setPage(selected);//actualiza la página seleccionada
+};
+ */
 
   const token = localStorage.getItem("token");
   const role = token ? JSON.parse(atob(token.split(".")[1])).role : null;
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Typography variant="h5" color="primary">Loading...</Typography>;
   }
   if (error) {
-    return <div>Error: {error}</div>;
+    return <Typography variant="h5" color="error">Error: {error}</Typography>;
   }
   return (
     <div className="center-container">
-      <div className="search-btn">
-        <div item>
-          <TextField
-            label="Buscar"
-            variant="outlined"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-        </div>
-        <div item>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate("/assets/new")}
-          >
-            Agregar Asset
-          </Button>
-        </div>
-      </div>
+         <Box className="search-btn" sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, width: '100%' }}>
+            <TextField
+                label="Buscar"
+                variant="outlined"
+                value={searchTerm}
+                onChange={handleSearchChange}
+            />
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate("/assets/new")}
+            >
+                Agregar
+            </Button>
+        </Box>  
+
       <div className="table-container">
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="Asset List">
@@ -120,8 +124,7 @@ const AssetList = () => {
                       sortField === "description" ? sortDirection : "asc"
                     }
                     onClick={() => handleSort("description")}
-                  >
-                    Description
+                  >DESCRIPTION
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>
@@ -129,26 +132,22 @@ const AssetList = () => {
                     active={sortField === "category"}
                     direction={sortField === "category" ? sortDirection : "asc"}
                     onClick={() => handleSort("category")}
-                  >
-                    Category
+                  >CATEGORY
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>
-                  <TableSortLabel
-                    active={sortField === "assigned_employee"}
-                    direction={
-                      sortField === "assigned_employee" ? sortDirection : "asc"
-                    }
-                    onClick={() => handleSort("assigned_employee")}
-                  >
-                    Assigned Employee
-                  </TableSortLabel>
+                    <TableSortLabel
+                        active={sortField === "assigned_employee"}
+                        direction={sortField === "assigned_employee" ? sortDirection : "asc"}
+                        onClick={() => handleSort("assigned_employee")}
+                    >ASSIGNED EMPLOYEE
+                    </TableSortLabel>
                 </TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {assets.map((asset) => (
+              {filteredAssets.slice((page - 1) * 5, page * 5).map((asset) => (
                 <TableRow
                   key={asset.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -200,7 +199,7 @@ const AssetList = () => {
       </div>
       <Pagination
         count={totalPages}
-        page={currentPage}
+        page={page}
         onChange={handlePageChange}
         color="primary"
         sx={{ mt: 2 }}
