@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { addAsset } from '../../reducers/assetSlice';
-import { Button, TextField, Typography, Box, Alert } from '@mui/material';
+import { Button, TextField, Container, Typography, Box, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import "./AssetList.css";
 
@@ -41,8 +41,8 @@ const AssetCreate = () => {
     };
 
   return (
-    <div className='center-container'>
-        <Typography variant="h4">NUEVO ASSET</Typography>
+    <Container maxWidth="sm" className="create-user-container">
+        <Typography variant="h4" align="center">NUEVO ASSET</Typography>
         
         {showMessage && (
             <Alert severity="success">Asset agregado exitosamente</Alert>
@@ -98,7 +98,7 @@ const AssetCreate = () => {
                 </Button>
             </Box>
         </form>
-    </div>
+    </Container>
   )
 }
 

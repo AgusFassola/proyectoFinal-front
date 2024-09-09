@@ -2,7 +2,7 @@ import React,{ useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchAssetById, updateAsset } from '../../reducers/assetSlice'
-import { Button, TextField, Typography, Box } from '@mui/material';
+import { Button, TextField, Typography, Box, Alert } from '@mui/material';
 import "./AssetList.css";
 
 const AssetDetail = () => {
@@ -11,6 +11,7 @@ const AssetDetail = () => {
     const navigate = useNavigate();
     const asset = useSelector(state => state.assets.selectedAsset );
     const [isEditing, setIsEditing] = useState(false);
+    const [showMessage, setShowMessage] = useState(false);
     const [formData, setFormData] = useState({
         description: '',
         category: '',
@@ -46,7 +47,11 @@ const AssetDetail = () => {
             assigned_date: formData.assigned_date,
         };
         dispatch(updateAsset({ id, updatedData}));
+        setShowMessage(true);
         setIsEditing(false);
+            setTimeout(() => {
+                setShowMessage(false);
+            }, 1500);
     };
 
     const handleBack = () => {
@@ -81,6 +86,9 @@ const AssetDetail = () => {
         <div className='center-container'>
             <div className='table-container'>
             <Typography variant="h4">Detalle de Asset</Typography>
+            {showMessage && (
+             <Alert severity="success">Asset actualizado</Alert>
+            )}
             <TextField
                 label="Descripción"
                 name="description"

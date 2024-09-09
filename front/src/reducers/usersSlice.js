@@ -8,8 +8,9 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
 });
 
 //Agregar un usuario 
-export const addUser = createAsyncThunk('users/addUser', async (userData) => {
-  const response = await axios.post('http://localhost:5000/api/users/create', userData);
+export const addUser = createAsyncThunk('users/addUser', async (user) => {
+  console.log("addUser:",user)
+  const response = await axios.post('http://localhost:5000/api/users/create', user);
   return response.data.user;
 });
 
@@ -29,11 +30,7 @@ const initialState = {
 const userSlice = createSlice({
   name: 'users',
   initialState,
-  reducers: {
-    selectUser: (state, action) => {
-      state.selectedUser = state.users.find(user => user.id === action.payload);
-    },
-},
+  reducers: {},
   extraReducers: (builder) => {
     builder
         //handle fetchusers
@@ -61,5 +58,4 @@ const userSlice = createSlice({
   },
 });
 
-export const { selectUser } = userSlice.actions;
 export default userSlice.reducer;

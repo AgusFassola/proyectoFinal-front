@@ -15,13 +15,14 @@ const UserList = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
     const dispatch = useDispatch();
-    const { users, loading, error,totalPages } = useSelector(state => state.users);
-
+    const { users, loading, error } = useSelector(state => state.users);
+console.log("usuarios:",users)
     const [ sortField, setSortField ] = useState(null);
     const [ sortDirection, setSortDirection ] = useState('asc');
     const [ searchTerm, setSearchTerm ] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
+    const totalPages=1;
     useEffect(() => {
         dispatch(fetchUsers({ currentPage }));
     }, [dispatch, currentPage ]);
@@ -53,8 +54,16 @@ const UserList = () => {
         setCurrentPage(value);
         dispatch( fetchUsers({currentPage:value }));
     };
-
-    const sortedUsers = [...users].sort(( a, b ) => {
+    console.log("llegue?:",users);  
+    const filteredUsers = users.filter((user) => {
+        console.log("es aca?:",user.username)
+        return (
+            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.role.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    });
+    const sortedUsers = filteredUsers.sort(( a, b ) => {
         if(sortField){       
             const valueA = a[sortField].toLowerCase();
             const valueB = b[sortField].toLowerCase();
@@ -65,13 +74,7 @@ const UserList = () => {
         return 0;
     });
 
-    const filteredUsers = sortedUsers.filter((user) => {
-        return (
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.role.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    });
+
     
     if(loading){
         return(
@@ -95,7 +98,7 @@ const UserList = () => {
         return <Typography variant="h5" color="error">Error:{error}</Typography>;
     }
 
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
         return (
             <Box 
                 display="flex" 

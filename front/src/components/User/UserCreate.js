@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { addUser } from '../../reducers/usersSlice';
+import { addUser,fetchUsers } from '../../reducers/usersSlice';
 import { TextField, Button, Container, Typography, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio  } from '@mui/material';
 import "../../material/theme";
 
@@ -27,6 +27,8 @@ const UserCreate = () => {
 
        try{
         dispatch(addUser(formData));
+        console.log("enviado:",formData)
+        dispatch(fetchUsers());
         setShowMessage(true);
 
             setTimeout(() => {

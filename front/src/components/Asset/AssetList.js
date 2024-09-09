@@ -14,9 +14,7 @@ const AssetList = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState(null);
   const dispatch = useDispatch();
-  const { assets, loading, error, totalPages } = useSelector(
-    (state) => state.assets
-  );
+  const { assets, loading, error, totalPages } = useSelector((state) => state.assets);
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
