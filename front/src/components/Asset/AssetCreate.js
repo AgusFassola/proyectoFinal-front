@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { addAsset } from '../../reducers/assetSlice';
-import { Button, TextField, Typography, Box } from '@mui/material';
+import { Button, TextField, Typography, Box, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import "./AssetList.css";
 
@@ -15,6 +15,8 @@ const AssetCreate = () => {
         assigned_date: ''
     });
 
+    const [showMessage, setShowMessage] = useState(false);
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -24,62 +26,79 @@ const AssetCreate = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(addAsset(formData));
-        console.log("agregado:", formData)
-        alert('Asset agregado exitosamente');
-        navigate('/assets');
+        try{
+            dispatch(addAsset(formData));
+            setShowMessage(true);
+
+            setTimeout(() => {
+                setShowMessage(false);
+                navigate('/assets');
+            }, 3000);
+        }catch(error){
+            alert("error agregando el asset: "+ error.message);
+        }
+        
     };
+
   return (
     <div className='center-container'>
-    <Typography variant="h4">Agregar Nuevo Asset</Typography>
-    <form onSubmit={handleSubmit}>
-        <TextField
-            label="Descripción"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-        />
-        <TextField
-            label="Categoría"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-        />
-        <TextField
-            label="Empleado Asignado"
-            name="assigned_employee"
-            value={formData.assigned_employee}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-        />
-        <TextField
-            label="Fecha de Asignación"
-            name="assigned_date"
-            type="date"
-            value={formData.assigned_date}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-        />
-        <Box mt={2}>
-            <Button type="submit" variant="contained" color="primary">
-                Guardar
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={() => navigate('/assets')} sx={{ ml: 2 }}>
-                Cancelar
-            </Button>
-        </Box>
-    </form>
-</div>
+        <Typography variant="h4">NUEVO ASSET</Typography>
+        
+        {showMessage && (
+            <Alert severity="success">Asset agregado exitosamente</Alert>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+            <TextField
+                label="Descripción"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                required
+            />
+            <TextField
+                label="Categoría"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                required
+            />
+            <TextField
+                label="Empleado Asignado"
+                name="assigned_employee"
+                value={formData.assigned_employee}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                required
+            />
+            <TextField
+                label="Fecha de Asignación"
+                name="assigned_date"
+                type="date"
+                value={formData.assigned_date}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                required
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <Box mt={2}>
+                <Button type="submit" variant="contained" color="primary">
+                    Guardar
+                </Button>
+                <Button variant="outlined" color="secondary" onClick={() => navigate('/assets')} sx={{ ml: 2 }}>
+                    Cancelar
+                </Button>
+            </Box>
+        </form>
+    </div>
   )
 }
 

@@ -39,10 +39,14 @@ const AssetDetail = () => {
     };
 
     const handleSave = () => {
-        dispatch(updateAsset({ id, ...formData }));
-        console.log("modificado:",updateAsset({ id, ...formData }) )
+        const updatedData = {
+            description: formData.description,
+            category: formData.category,
+            assigned_employee: formData.assigned_employee,
+            assigned_date: formData.assigned_date,
+        };
+        dispatch(updateAsset({ id, updatedData}));
         setIsEditing(false);
-        //handleBack();
     };
 
     const handleBack = () => {
@@ -59,7 +63,18 @@ const AssetDetail = () => {
     };
 
     if (!asset) {
-        return <Typography>Asset no encontrado.</Typography>;
+        return(
+            <Box
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                height="60vh" 
+                textAlign="center"
+                flexDirection="column"
+            >
+                <Typography>ASSET NO ENCONTRADO.</Typography>
+            </Box>
+        ) 
     }
 
     return (

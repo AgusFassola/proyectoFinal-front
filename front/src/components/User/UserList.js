@@ -3,169 +3,229 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers, deleteUser } from '../../reducers/usersSlice';
 import { Link } from 'react-router-dom';
 
-import ReactPaginate from "react-paginate";
+import { 
+    Box, Typography, Table, TableBody, TableCell, TableContainer, TableSortLabel,
+    TableHead, TableRow, Paper, Button, TextField, 
+    Pagination , CircularProgress, Dialog,DialogActions,
+    DialogContent,DialogTitle,DialogContentText
+} from '@mui/material';
+import "../../material/theme";
 
 const UserList = () => {
+    const [openDialog, setOpenDialog] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
     const dispatch = useDispatch();
-    const { users, loading, error } = useSelector(state => state.users);
+    const { users, loading, error,totalPages } = useSelector(state => state.users);
 
-    useEffect(() => {
-        dispatch(fetchUsers());
-    }, [dispatch]);
-
-    const handleDeleteClick = async (id) => {
-
-        if (window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
-            dispatch(deleteUser(id));
-        }
-    };
-
-    //PARA ORDENAR
     const [ sortField, setSortField ] = useState(null);
     const [ sortDirection, setSortDirection ] = useState('asc');
+    const [ searchTerm, setSearchTerm ] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        dispatch(fetchUsers({ currentPage }));
+    }, [dispatch, currentPage ]);
+
+    const handleOpenDialog = (user) => {
+        setUserToDelete(user);
+        setOpenDialog(true);
+      };
+      const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setUserToDelete(null);
+      };
+      const handleDelete = () => {
+        dispatch(deleteUser(userToDelete.id));
+        handleCloseDialog();
+      };
 
     const handleSort = (field) => {
-        const newSortDirection = 
-            sortField === field &&
-            sortDirection === 'asc' ? 'desc' : 'asc'
-        //actualiza el campo y la direccion
+        const isAsc = sortField === field && sortDirection === "asc";
+        setSortDirection(isAsc ? "desc" : "asc");
         setSortField(field);
-        setSortDirection(newSortDirection); 
     };
 
-
-    //PARA BUSCAR
-    const [ searchTerm, setSearchTerm ] = useState('');
-
-       const filteredUsers = users.filter((user) => {
-            return (
-                user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.role.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        });
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
     
-    
-
-    //PARA PAGINACION   
-    const [pageNumber, setPageNumber] = useState(0);
-    const usersPerPage = 5;
-    const pagesVisited = pageNumber * usersPerPage;
-    
-    const pageCount =  Math.ceil(filteredUsers.length / usersPerPage);//total de páginas necesarias redondeando para arriba
-    const changePage = ({ selected }) => {
-        setPageNumber(selected);//actualiza la página seleccionada
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+        dispatch( fetchUsers({currentPage:value }));
     };
 
-    //array nuevo con empleados ordenados
-    const sortedUsers = filteredUsers.sort(( a, b ) => {
-        if(sortField){        //solo ordena si se especificó un campo para ordenar
-            const fieldA = a[sortField];
-            const fieldB = b[sortField];
-            if( sortDirection === 'asc'){
-                return fieldA > fieldB ? 1 : -1;//orden ascendente
-            }else{
-                return fieldA < fieldB ? 1 : -1;//orden descendente
-            }
-        }
-        return 0;//en caso de no haber campo, no cambia el orden
+    const sortedUsers = [...users].sort(( a, b ) => {
+        if(sortField){       
+            const valueA = a[sortField].toLowerCase();
+            const valueB = b[sortField].toLowerCase();
+            if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+            if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+          }
+        return 0;
+    });
+
+    const filteredUsers = sortedUsers.filter((user) => {
+        return (
+            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.role.toLowerCase().includes(searchTerm.toLowerCase())
+        );
     });
     
     if(loading){
-        return <div className="alert alert-info">Cargando usuarios...</div>;
+        return(
+            <Box 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                height="100vh" 
+                textAlign="center"
+                flexDirection="column"
+            >
+                <Typography variant="h6" mt={2}>
+                   Cargando users...
+                </Typography>
+                <CircularProgress/>
+            </Box>
+        )
     }
 
     if(error){
-        return <div className="alert alert-danger">{error}</div>;
+        return <Typography variant="h5" color="error">Error:{error}</Typography>;
     }
 
     if (users.length === 0) {
         return (
-            <div className="alert alert-info">
-                No hay usuarios disponibles
-            </div>);
+            <Box 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                height="100vh" 
+                textAlign="center"
+                flexDirection="column"
+            >
+                <Typography variant="h6" mt={2}>
+                    No hay usuarios disponibles
+                </Typography>
+            </Box>
+        );
     }
 
     return (
-        <div className="primer-div">
-            <h2 className="mb-4">Lista de usuarios:</h2>
-
-            <div className="mb-3">
-                <input
-                    type="text"
-                    placeholder="Buscar"
-                    className="form-control"
+        <Box className="center-container">
+            <Box  sx={{ display: 'flex', flexDirection:'row',  mb: 3 }}>
+                <TextField
+                    label="Buscar"
+                    variant="outlined"
+                    size="small"
+                    fullWidth={false}
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
+                    sx={{ width: '300px' }} 
                 />
+                <Button 
+                    variant="contained" 
+                    color="secondary" 
+                    component={Link} 
+                    to="/users/new"
+                    sx={{ mb: 2 }}
+                >
+                    Crear usuario
+                </Button>
+            </Box>
+            <div className="table-container">
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>
+                                <TableSortLabel
+                                    active={sortField === "username"}
+                                    direction={
+                                    sortField === "username" ? sortDirection : "asc"
+                                    }
+                                    onClick={() => handleSort("username")}
+                                >NOMBRE
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell>
+                            <TableSortLabel
+                                    active={sortField === "role"}
+                                    direction={
+                                    sortField === "role" ? sortDirection : "asc"
+                                    }
+                                    onClick={() => handleSort("role")}
+                                >ROL
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell>
+                            <TableSortLabel
+                                    active={sortField === "email"}
+                                    direction={
+                                    sortField === "email" ? sortDirection : "asc"
+                                    }
+                                    onClick={() => handleSort("email")}
+                                >EMAIL
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell>ACCIÓN</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredUsers.map(user => (
+                            <TableRow key={user.id}>
+                                <TableCell>{user.username}</TableCell>
+                                <TableCell>{user.role}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>
+                                    <Button 
+                                        variant="contained" 
+                                        color="error" 
+                                        onClick={() => handleOpenDialog(user)}
+                                    >
+                                        Eliminar
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
             </div>
-            <table className="table table-striped">
-                <thead>
-
-                    <tr>
-                        <th onClick={() => handleSort('username')}>Nombre</th>
-                        <th onClick={() => handleSort('role')}>Rol</th>
-                        <th onClick={() => handleSort('email')}>Email</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <Link to="/users/new" className='signup-link'
-            >Crear nuevo usuario</Link>
-                <tbody>
-                    {/* se crea una copia de una porcion del array
-                    devuelve los empleados del 0 al 4 */}
-                    {sortedUsers.slice(pagesVisited, pagesVisited + usersPerPage).map(user => (
-                        <tr key={user.id}>
-                            <td>
-                                <Link 
-                                    className="user-link"
-                                    to={`/users/${user.id}`}>
-                                    {user.username}
-                                    
-                                </Link>
-                            </td>
-                            <td>
-                                <Link
-                                    className="user-link"
-                                    to={`/users/${user.id}`}>
-                                    {user.role}
-                                </Link>
-                            </td>
-                            <td>
-                                <Link
-                                    className="user-link"
-                                    to={`/users/${user.id}`}>
-                                    {user.email}
-                                </Link>
-                            </td>
-                            
-                            <td>
-                                    <button 
-                                        className="btn btn-danger" 
-                                        onClick={() => handleDeleteClick(user.id)}
-                                    >Eliminar</button>
-                            </td>
-
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            <ReactPaginate
-                previousLabel={"Anterior"}
-                nextLabel={"Siguiente"}
-                pageCount={pageCount}
-                onPageChange={changePage}
-                containerClassName={"pagination"}
-
-                pageClassName={"page-item"}
-                pageLinkClassName={"page-link"}
-                previousClassName={"page-item"}
-                previousLinkClassName={"page-link"}
-                nextClassName={"page-item"}
-                nextLinkClassName={"page-link"}
-                activeClassName={"active"}
-            />
-        </div>
+            <Box display="flex" justifyContent="center" mt={3}>
+                <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
+            </Box>
+            <Dialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Confirmar Eliminación"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        ¿Estás seguro que deseas eliminar el usuario "
+                        {userToDelete?.username}"?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancelar
+                    </Button>
+                    <Button onClick={handleDelete} color="error" autoFocus>
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box>
     );
 };
 

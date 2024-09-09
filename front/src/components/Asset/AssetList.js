@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAssets, deleteAsset } from "../../reducers/assetSlice";
-import {Table,TableContainer,TableBody,TableCell,TableHead,
-  TableRow,Paper,Button,Typography,Dialog,DialogActions,
-  DialogContent,DialogTitle,DialogContentText,TextField,
-  TableSortLabel,Pagination, Box} from "@mui/material";
+import {
+    Table,TableContainer,TableBody,TableCell,TableHead,
+    TableRow,Paper,Button,Typography,Dialog,DialogActions,
+    DialogContent,DialogTitle,DialogContentText,TextField,
+    TableSortLabel,Pagination, Box, CircularProgress
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "../../material/theme";
 
@@ -12,7 +14,7 @@ const AssetList = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState(null);
   const dispatch = useDispatch();
-  const { assets, loading, error, totalPages, currentPage } = useSelector(
+  const { assets, loading, error, totalPages } = useSelector(
     (state) => state.assets
   );
   const navigate = useNavigate();
@@ -20,14 +22,11 @@ const AssetList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
-  const [page, setPage] = useState(1);
-  //const pagesVisited = page * totalPages;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    dispatch(
-      fetchAssets({ description: searchTerm, sortField, sortDirection, page })
-    );
-  }, [dispatch, searchTerm, sortField, sortDirection, page]);
+    dispatch( fetchAssets({ currentPage }));
+  }, [dispatch,  currentPage]);
 
   const handleOpenDialog = (asset) => {
     setAssetToDelete(asset);
@@ -53,8 +52,10 @@ const AssetList = () => {
   };
 
   const handlePageChange = (event, value) => {
-    setPage(value);
+    setCurrentPage(value);
+    dispatch( fetchAssets({currentPage:value }));
   };
+
   const sortedAssets = [...assets].sort((a, b) => {
     if (sortField) {
       const valueA = a[sortField].toLowerCase();
@@ -76,36 +77,42 @@ const AssetList = () => {
     );
 });
 
-/* const assetsPerPage = 5;
-const pagesVisited = page * assetsPerPage; */
-
-//const pageCount =  Math.ceil(filteredAssets.length / totalPages);//total de páginas necesarias redondeando para arriba
-/* const changePage = ({ selected }) => {
-    setPage(selected);//actualiza la página seleccionada
-};
- */
-
   const token = localStorage.getItem("token");
   const role = token ? JSON.parse(atob(token.split(".")[1])).role : null;
 
   if (loading) {
-    return <Typography variant="h5" color="primary">Loading...</Typography>;
-  }
+    return (
+        <Box
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            height="100vh" 
+            textAlign="center"
+            flexDirection="column"
+        >
+            <Typography variant="h5" color="primary">Cargando assets...</Typography>
+            <CircularProgress/>
+        </Box>
+  );
+}
   if (error) {
     return <Typography variant="h5" color="error">Error: {error}</Typography>;
   }
   return (
     <div className="center-container">
-         <Box className="search-btn" sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, width: '100%' }}>
+         <Box  sx={{ display: 'flex',  mb: 3 }}>
             <TextField
                 label="Buscar"
                 variant="outlined"
+                size="small"
+                fullWidth={false}
                 value={searchTerm}
                 onChange={handleSearchChange}
+                sx={{ width: '300px' }}
             />
             <Button
                 variant="contained"
-                color="primary"
+                color="secondary"
                 onClick={() => navigate("/assets/new")}
             >
                 Agregar
@@ -124,7 +131,7 @@ const pagesVisited = page * assetsPerPage; */
                       sortField === "description" ? sortDirection : "asc"
                     }
                     onClick={() => handleSort("description")}
-                  >DESCRIPTION
+                  >DESCRIPCION
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>
@@ -132,7 +139,7 @@ const pagesVisited = page * assetsPerPage; */
                     active={sortField === "category"}
                     direction={sortField === "category" ? sortDirection : "asc"}
                     onClick={() => handleSort("category")}
-                  >CATEGORY
+                  >CATEGORIA
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>
@@ -140,14 +147,14 @@ const pagesVisited = page * assetsPerPage; */
                         active={sortField === "assigned_employee"}
                         direction={sortField === "assigned_employee" ? sortDirection : "asc"}
                         onClick={() => handleSort("assigned_employee")}
-                    >ASSIGNED EMPLOYEE
+                    >EMPLEADO ASIGNADO
                     </TableSortLabel>
                 </TableCell>
-                <TableCell>ACTIONS</TableCell>
+                <TableCell>ACCIONES</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredAssets.slice((page - 1) * 5, page * 5).map((asset) => (
+              {filteredAssets.map((asset) => (
                 <TableRow
                   key={asset.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -169,7 +176,7 @@ const pagesVisited = page * assetsPerPage; */
                       }}
                       sx={{ mr: 1 }}
                     >
-                      Details
+                      Detalles
                     </Button>
                     {role === "admin" && (
                       <Button
@@ -180,7 +187,7 @@ const pagesVisited = page * assetsPerPage; */
                           handleOpenDialog(asset);
                         }}
                       >
-                        Delete
+                        Eliminar
                       </Button>
                     )}
                   </TableCell>
@@ -199,7 +206,7 @@ const pagesVisited = page * assetsPerPage; */
       </div>
       <Pagination
         count={totalPages}
-        page={page}
+        page={currentPage}
         onChange={handlePageChange}
         color="primary"
         sx={{ mt: 2 }}

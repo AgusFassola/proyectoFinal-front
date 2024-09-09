@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addUser } from '../../reducers/usersSlice';
-import { TextField, Button, Container, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio  } from '@mui/material';
+import { TextField, Button, Container, Typography, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio  } from '@mui/material';
 import "../../material/theme";
 
 const UserCreate = () => {
@@ -14,6 +14,7 @@ const UserCreate = () => {
     });
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [showMessage, setShowMessage] = useState(false);
 
     const handleChange = e => {
         const { name, value } = e.target;
@@ -21,14 +22,17 @@ const UserCreate = () => {
     };
     
 
-    const handleSubmit = async e => {
+    const handleSubmit =  e => {
         e.preventDefault();
 
        try{
-        await dispatch(addUser({ ...formData}));
-        alert("Usuario agregado correctamente");
-        navigate('/users');
-        console.log("nuevo empleado:",formData)
+        dispatch(addUser(formData));
+        setShowMessage(true);
+
+            setTimeout(() => {
+                setShowMessage(false);
+                navigate('/users');
+            }, 3000);
        }catch(error){
         alert("error agregando el usuario: "+ error.message);
        }
@@ -37,8 +41,11 @@ const UserCreate = () => {
     return (
         <Container maxWidth="sm" className="create-user-container">
             <Typography variant="h4" align="center" gutterBottom>
-                Nuevo usuario
+                NUEVO USUARIO
             </Typography>
+            {showMessage && (
+             <Alert severity="success">Usuario agregado exitosamente</Alert>
+            )}
             <form onSubmit={handleSubmit}>
                 <TextField 
                     label="Nombre de usuario"
