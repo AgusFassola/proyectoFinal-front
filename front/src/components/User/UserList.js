@@ -24,7 +24,7 @@ console.log("usuarios:",users)
 
     const totalPages=1;
     useEffect(() => {
-        dispatch(fetchUsers({ currentPage }));
+        dispatch(fetchUsers());
     }, [dispatch, currentPage ]);
 
     const handleOpenDialog = (user) => {
@@ -52,11 +52,9 @@ console.log("usuarios:",users)
     
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
-        dispatch( fetchUsers({currentPage:value }));
+        dispatch( fetchUsers());
     };
-    console.log("llegue?:",users);  
     const filteredUsers = users.filter((user) => {
-        console.log("es aca?:",user.username)
         return (
             user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,8 +72,6 @@ console.log("usuarios:",users)
         return 0;
     });
 
-
-    
     if(loading){
         return(
             <Box 
@@ -176,7 +172,7 @@ console.log("usuarios:",users)
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredUsers.map(user => (
+                        {sortedUsers.map(user => (
                             <TableRow key={user.id}>
                                 <TableCell>{user.username}</TableCell>
                                 <TableCell>{user.role}</TableCell>
@@ -197,12 +193,12 @@ console.log("usuarios:",users)
             </TableContainer>
             </div>
             <Box display="flex" justifyContent="center" mt={3}>
-                <Pagination
+                {<Pagination
                     count={totalPages}
                     page={currentPage}
                     onChange={handlePageChange}
                     color="primary"
-                />
+                />}
             </Box>
             <Dialog
                 open={openDialog}

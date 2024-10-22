@@ -34,6 +34,7 @@ const UserCreate = () => {
             setTimeout(() => {
                 setShowMessage(false);
                 navigate('/users');
+                console.log("enviado2:",formData)
             }, 3000);
        }catch(error){
         alert("error agregando el usuario: "+ error.message);
