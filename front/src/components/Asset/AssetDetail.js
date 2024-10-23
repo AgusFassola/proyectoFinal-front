@@ -1,7 +1,7 @@
 import React,{ useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchAssetById, updateAsset } from '../../reducers/assetSlice'
+import { fetchAssetById, updateAsset,clearSelectedAsset } from '../../reducers/assetSlice'
 import { Button, TextField, Typography, Box, Alert } from '@mui/material';
 import "./AssetList.css";
 
@@ -20,6 +20,14 @@ const AssetDetail = () => {
     });
 
     useEffect(() => {
+        dispatch(fetchAssetById(id)); // Trae el asset al montar
+        return () => {
+            dispatch(clearSelectedAsset()); // Limpia el asset al desmontar
+        };
+    }, [dispatch, id]);
+
+
+    useEffect(() => {
         if (asset) {
             setFormData({
                 description: asset.description,
@@ -27,25 +35,25 @@ const AssetDetail = () => {
                 assigned_employee: asset.assigned_employee,
                 assigned_date: new Date(asset.assigned_date).toISOString().split('T')[0]
             });
-        } else {
+        } /* else {
             dispatch(fetchAssetById(id));
-        }
-    }, [asset, dispatch, id]);
+        } */
+    }, [asset]);
 
     const handleChange = (e) => {
         setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
+            ...formData, [e.target.name]: e.target.value
         });
     };
 
     const handleSave = () => {
-        const updatedData = {
+        /* const updatedData = {
             description: formData.description,
             category: formData.category,
             assigned_employee: formData.assigned_employee,
             assigned_date: formData.assigned_date,
-        };
+        }; */
+        const updatedData = { ...formData };
         dispatch(updateAsset({ id, updatedData}));
         setShowMessage(true);
         setIsEditing(false);
@@ -54,9 +62,7 @@ const AssetDetail = () => {
             }, 1500);
     };
 
-    const handleBack = () => {
-        navigate('/assets');
-    }
+    const handleBack = () => navigate('/assets');
     const handleCancel = () => {
         setIsEditing(false);
         setFormData({

@@ -47,7 +47,11 @@ const initialState = {
 const assetSlice = createSlice({
     name: 'assets',
     initialState,
-    reducers: {},
+    reducers: {
+        clearSelectedAsset: (state) => {
+            state.selectedAsset = null;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchAssets.pending, (state) => {
@@ -94,3 +98,4 @@ const assetSlice = createSlice({
 });
 
 export default assetSlice.reducer;
+export const { clearSelectedAsset } = assetSlice.actions;
